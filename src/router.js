@@ -1,3 +1,6 @@
+const toStringFormat = "{0}\t\t{1}\t\t\t{2}";
+const stringFormat = require("./utils/string-format");
+
 module.exports = function router() {
     var routes = [];
 
@@ -10,6 +13,8 @@ module.exports = function router() {
         post: post,
         put: put,
         delete: del,
+
+        toString: toString,
     }
 
     function route(method, url, callback) {
@@ -36,4 +41,12 @@ module.exports = function router() {
         return route("DELETE", url, callback);
     };
 
+    function toString() {
+        var result = "";
+        for (var i in routes) {
+            var route = routes[i];
+            result += stringFormat(toStringFormat, route.method, route.url, route.callback) + "\n";
+        }
+        return result;
+    }
 }

@@ -14,22 +14,24 @@ module.exports = function router(expressApp, routeConfig, options) {
     }
     options = options || {};
     var baseUrl = options.url || "/";
+    var baseFolder = options.baseFolder || "/";
     var routes = routeConfig.routes;
     var prettyResult = options.prettyResult;
     var jsonify = prettyResult ? jstring : JSON.stringify;
 
 
     for (var i in routes) {
-        var config = routes[i];
-        var routeUrl = config.url;
-        var callback = config.callback;
-        var method = config.method.toLowerCase();
+        var route = routes[i];
+        var routeUrl = route.url;
+        var callback = route.callback;
+        var method = route.method.toLowerCase();
         var callbackType = typeof (callback);
 
         var callbackHandler = callbackHandlers[callbackType];
         var callbackFunction = callbackHandler(callback);
         var wrappedAsync = wrapAsync(callbackFunction);
-        expressApp[method](routeUrl, wrappedAsync);
+        var endpoint = url(baseUrl, routeUrl);
+        expressApp[method](endpoint, wrappedAsync);
     }
 
     function functionCallbackHandler(callback) {
@@ -40,8 +42,8 @@ module.exports = function router(expressApp, routeConfig, options) {
         var callbackNamespaceSplit = callbackNamespace.split(".");
         var functionName = callbackNamespaceSplit.pop();
         var callbackPath = callbackNamespaceSplit.join("/");
-        var controllerPath = url(workingDir, baseUrl, callbackPath);
-        var controller = require(callbackPath)[functionName];
+        var controllerPath = url(workingDir, baseFolder, callbackPath);
+        var controller = require(controllerPath)[functionName];
         return controller;
     }
 
@@ -52,6 +54,10 @@ module.exports = function router(expressApp, routeConfig, options) {
             if (resultPromise && resultPromise.then)
                 resultPromise.then(function (result) {
                     res.end(jsonify(result));
+                });
+            if (resultPromise && resultPromise.catch)
+                resultPromise.catch(function (result) {
+                    next(result);
                 });
             return resultPromise;
         }

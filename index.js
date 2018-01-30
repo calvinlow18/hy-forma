@@ -13,6 +13,8 @@ var forma = {
         mongo: sourceRequire("utils/mongo"),
         jstring: sourceRequire("utils/jstring"),
         functionArguments: sourceRequire("utils/function-arguments"),
+        stringFormat: sourceRequire("utils/string-format"),
+        difference: sourceRequire("utils/difference"),
     },
     express: {
         middleware: sourceRequire("express/middleware"),

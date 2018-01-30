@@ -4,56 +4,66 @@ var MongoClient = require("mongodb").MongoClient;
 
 module.exports = function mongo(config) {
 
-    requiredConfig("database");
-    requiredConfig("collection");
-
-
     var connectionString = generateConnectionString();
     var collectionName = config.collection;
     var databaseName = config.database;
     var logger = config.logger || function () {};
 
     var wraps = {
-        insert: insert,
-        update: update,
-        delete: del,
-        select: select,
+        insert: insert, // object: insert(data)
+        update: update, // object: update(query,values)
+        delete: del, // object: delete(query)
+        select: select, // [object]: select(query?,options?)
+        connect: connect, // object: connect()
+        setCollection: setCollection, // void: setCollection(name)
+        setDatabase: setDatabase, // void: setDatabase(name)
     }
 
     return wraps;
 
+    async function connect() {
+        var result = {};
 
-
-    async function connectDatabase() {
         logger("Create Connection", connectionString);
-        var connection = await MongoClient.connect(connectionString);
-        logger("Connecting Database");
-        var database = await connection.db(databaseName);
-        logger("Connection success");
-        return database;
+        var session = await MongoClient.connect(connectionString);
+        result.session = session;
+
+        if (databaseName) {
+            logger("Connecting Database", databaseName);
+            var database = await session.db(databaseName);
+            result.database = database;
+            if (collectionName) {
+                logger("Connecting Collection", collectionName);
+                var collection = await database.collection(collectionName);
+                result.collection = collection;
+            }
+        }
+        return result;
     }
 
     async function insert(data) {
         logger("Inserting");
-        var database = await connectDatabase();
-        logger("Collection", collectionName);
-        var collection = await database.collection(collectionName);
+        var connection = await connect();
+        var collection = await connection.collection;
+        if (!collection)
+            throw Error("No collection defined");
         logger("Insert: ", data);
         var result = await collection.insert(data);
         logger("Insert Result", result);
-        database.close();
+        connection.session.close();
         return result;
     }
 
     async function update(query, values) {
         logger("Updating");
-        var database = await connectDatabase();
-        logger("Collection", collectionName);
-        var collection = await database.collection(collectionName);
+        var connection = await connect();
+        var collection = await connection.collection;
+        if (!collection)
+            throw Error("No collection defined");
         logger("Update Query: ", query, "Update Values: ", values);
         var result = await collection.updateMany(query, values);
         logger("Update Result", result);
-        database.close();
+        connection.session.close();
         return result;
     }
 
@@ -61,9 +71,10 @@ module.exports = function mongo(config) {
         query = query || {};
         options = options || {};
         logger("Selecting");
-        var database = await connectDatabase();
-        logger("Collection", collectionName);
-        var collection = await database.collection(collectionName);
+        var connection = await connect();
+        var collection = await connection.collection;
+        if (!collection)
+            throw Error("No collection defined");
         logger("Select Query: ", query, "Select Options", options);
         var cursor = collection.find(query);
         cursor = applySort(cursor, options);
@@ -71,20 +82,29 @@ module.exports = function mongo(config) {
         cursor = applyLimit(cursor, options);
         var result = await cursor.toArray();
         logger("Select Result", result);
-        database.close();
+        connection.session.close();
         return result;
     }
 
     async function del(query) {
         logger("Deleting");
-        var database = await connectDatabase();
-        logger("Collection", collectionName);
-        var collection = await database.collection(collectionName);
+        var connection = await connect();
+        var collection = await connection.collection;
+        if (!collection)
+            throw Error("No collection defined");
         logger("Delete Query: ", query);
         var result = await collection.remove(query);
         logger("Delete Result", result);
-        database.close();
+        connection.session.close();
         return result;
+    }
+
+    function setCollection(collection) {
+        collectionName = collection;
+    }
+
+    function setDatabase(database) {
+        databaseName = database;
     }
 
     function generateConnectionString() {
