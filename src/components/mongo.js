@@ -10,11 +10,15 @@ module.exports = function mongo(config) {
     var logger = config.logger || function () {};
 
     var wraps = {
+        connect: connect, // object: connect()
+
         insert: insert, // object: insert(data)
         update: update, // object: update(query,values)
         delete: del, // object: delete(query)
         select: select, // [object]: select(query?,options?)
-        connect: connect, // object: connect()
+
+        count: count, // int: count(query?)
+
         setCollection: setCollection, // void: setCollection(name)
         setDatabase: setDatabase, // void: setDatabase(name)
     }
@@ -98,6 +102,21 @@ module.exports = function mongo(config) {
         connection.session.close();
         return result;
     }
+
+    async function count(query) {
+        logger("Counting");
+        query = query || {};
+        var connection = await connect();
+        var collection = await connection.collection;
+        if (!collection)
+            throw Error("No collection defined");
+        logger("Count Query", query);
+        var result = await collection.find(query).count();
+        logger("Count: ", result);
+        connection.session.close();
+        return result;
+    }
+
 
     function setCollection(collection) {
         collectionName = collection;
