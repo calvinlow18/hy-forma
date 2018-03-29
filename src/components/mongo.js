@@ -18,6 +18,8 @@ module.exports = function mongo(config) {
         select: select, // [object]: select(query?,options?)
 
         count: count, // int: count(query?)
+        distinct: distinct, //
+        group: group,
 
         setCollection: setCollection, // void: setCollection(name)
         setDatabase: setDatabase, // void: setDatabase(name)
@@ -113,6 +115,39 @@ module.exports = function mongo(config) {
         logger("Count Query", query);
         var result = await collection.find(query).count();
         logger("Count: ", result);
+        connection.session.close();
+        return result;
+    }
+
+    async function distinct(field, query, options) {
+        logger("Distincting");
+        query = query || {};
+        var connection = await connect();
+        var collection = await connection.collection;
+        if (!collection)
+            throw Error("No collection defined");
+        logger("Distinct Query", query);
+        var result = await collection.distinct(field, query, options);
+        logger("Distinct: ", result);
+        connection.session.close();
+        return result;
+    }
+
+    async function group(keys, condition, initial, reduce, finalize, command, options) {
+        logger("Grouping");
+        keys = keys || {};
+        condition = condition || {};
+        initial = initial || {};
+        reduce = reduce || function () {};
+        finalize = finalize || function () {};
+        options = options || {};
+
+        var connection = await connect();
+        var collection = await connection.collection;
+        if (!collection)
+            throw Error("No collection defined");
+        var result = await collection.group(keys, condition, initial, reduce, finalize, command, options);
+        logger("Grouping: ", result);
         connection.session.close();
         return result;
     }
