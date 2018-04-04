@@ -24,6 +24,7 @@ var forma = {
     },
     router: sourceRequire("router"),
     logger: sourceRequire("logger"),
+    kernel: sourceRequire("kernel"),
 }
 
 
