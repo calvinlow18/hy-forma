@@ -54,11 +54,7 @@ module.exports = function router(expressApp, routeConfig, options) {
             if (resultPromise && resultPromise.then)
                 resultPromise.then(function (result) {
                     res.end(jsonify(result));
-                });
-            if (resultPromise && resultPromise.catch)
-                resultPromise.catch(function (result) {
-                    next(result);
-                });
+                }, next);
             return resultPromise;
         }
 
