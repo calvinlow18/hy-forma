@@ -1,8 +1,12 @@
-0.2.0:
-- kernel for dependency injection
+0.2.3:
+- fixed bug on url starts with "//" not being normalized
+
+0.2.2:
+- adding extension for mongo.component by using mongo.component.extension
 
 0.2.1:
 - fixed error thrown by router not catched
 
-0.2.2:
-- adding extension for mongo.component by using mongo.component.extension
+0.2.0:
+- kernel for dependency injection
+

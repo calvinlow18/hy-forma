@@ -17,7 +17,6 @@ module.exports = function router(expressApp, routeConfig, options) {
     var baseFolder = options.baseFolder || "/";
     var routes = routeConfig.routes;
     var prettyResult = options.prettyResult;
-    var jsonify = prettyResult ? jstring : JSON.stringify;
 
 
     for (var i in routes) {
@@ -31,6 +30,7 @@ module.exports = function router(expressApp, routeConfig, options) {
         var callbackFunction = callbackHandler(callback);
         var wrappedAsync = wrapAsync(callbackFunction);
         var endpoint = url(baseUrl, routeUrl);
+        console.log(endpoint);
         expressApp[method](endpoint, wrappedAsync);
     }
 
@@ -53,7 +53,7 @@ module.exports = function router(expressApp, routeConfig, options) {
             var resultPromise = callbackFunction(req, res, next);
             if (resultPromise && resultPromise.then)
                 resultPromise.then(function (result) {
-                    res.end(jsonify(result));
+                    res.json(result);
                 }, next);
             return resultPromise;
         }
