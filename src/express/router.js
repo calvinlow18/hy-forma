@@ -30,7 +30,6 @@ module.exports = function router(expressApp, routeConfig, options) {
         var callbackFunction = callbackHandler(callback);
         var wrappedAsync = wrapAsync(callbackFunction);
         var endpoint = url(baseUrl, routeUrl);
-        console.log(endpoint);
         expressApp[method](endpoint, wrappedAsync);
     }
 
