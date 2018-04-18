@@ -2,7 +2,11 @@ const connectionStringFormat = "mongodb://{{usernameAndPassword}}{{host}}:{{port
 
 var MongoClient = require("mongodb").MongoClient;
 
-module.exports = function mongo(config) {
+module.exports = mongo;
+
+function mongo(config) {
+    var extension = mongo.extension || function () {};
+
 
     var connectionString = generateConnectionString();
     var collectionName = config.collection;
@@ -24,6 +28,8 @@ module.exports = function mongo(config) {
         setCollection: setCollection, // void: setCollection(name)
         setDatabase: setDatabase, // void: setDatabase(name)
     }
+
+    extension(wraps);
 
     return wraps;
 

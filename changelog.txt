@@ -1,0 +1,8 @@
+0.2.0:
+- kernel for dependency injection
+
+0.2.1:
+- fixed error thrown by router not catched
+
+0.2.2:
+- adding extension for mongo.component by using mongo.component.extension
