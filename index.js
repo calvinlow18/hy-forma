@@ -2,7 +2,8 @@ const baseSource = "./src";
 
 var forma = {
     components: {
-        mongo: sourceRequire("components/mongo")
+        mongo: sourceRequire("components/mongo"),
+        httpRequest: sourceRequire("components/http-request"),
     },
     utils: {
         argsenv: sourceRequire("utils/argsenv"),
@@ -17,6 +18,7 @@ var forma = {
         difference: sourceRequire("utils/difference"),
         cleanNull: sourceRequire("utils/clean-undefined"),
         cleanEmpty: sourceRequire("utils/clean-empty"),
+        combine: sourceRequire("utils/combine"),
     },
     express: {
         middleware: sourceRequire("express/middleware"),

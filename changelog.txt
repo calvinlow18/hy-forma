@@ -1,3 +1,7 @@
+0.2.4:
+- adding http request component
+- adding combine utils
+
 0.2.3:
 - fixed bug on url starts with "//" not being normalized
 
