@@ -59,7 +59,7 @@ function http(endpoint, options) {
         return await result;
     }
 
-    async function post(data, targetUrl, options) {
+    async function post(targetUrl, data, options) {
         options = options || {};
         targetUrl = targetUrl || "";
         return await send(combine(options, {
@@ -81,7 +81,7 @@ function http(endpoint, options) {
 
     }
 
-    async function put(data, targetUrl, options) {
+    async function put(targetUrl, data, options) {
         options = options || {};
         targetUrl = targetUrl || "";
         return await send(combine(options, {
