@@ -1,3 +1,9 @@
+0.2.6:
+- fixed middleware route ignored
+
+0.2.5:
+- changing http request to follow convention
+
 0.2.4:
 - adding http request component
 - adding combine utils

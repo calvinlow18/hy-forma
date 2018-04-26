@@ -32,6 +32,6 @@ module.exports = function middleware(expressApp, middlewareConfig, options) {
         var handler = config.handler;
         var route = config.route || "/";
         var endpoint = url(baseUrl, route);
-        expressApp.use(baseUrl, handler)
+        expressApp.use(endpoint, handler)
     }
 };
