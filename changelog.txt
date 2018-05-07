@@ -1,3 +1,6 @@
+0.2.7:
+- adding defaultLimit and maximumLimit for mongo component
+
 0.2.6:
 - fixed middleware route ignored
 

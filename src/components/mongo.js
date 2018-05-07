@@ -11,6 +11,8 @@ function mongo(config) {
     var connectionString = generateConnectionString();
     var collectionName = config.collection;
     var databaseName = config.database;
+    var defaultLimit = config.defaultLimit;
+    var maximumLimit = config.maximumLimit;
     var logger = config.logger || function () {};
 
     var wraps = {
@@ -197,22 +199,24 @@ function mongo(config) {
 
     }
 
-}
+    function applySort(cursor, options) {
+        if (!options.sort)
+            return cursor;
+        return cursor.sort(options.sort);
+    }
 
-function applySort(cursor, options) {
-    if (!options.sort)
-        return cursor;
-    return cursor.sort(options.sort);
-}
+    function applySkip(cursor, options) {
+        if (options.skip === undefined)
+            return cursor;
+        return cursor.skip(options.skip);
+    }
 
-function applySkip(cursor, options) {
-    if (options.skip === undefined)
-        return cursor;
-    return cursor.skip(options.skip);
-}
-
-function applyLimit(cursor, options) {
-    if (options.limit === undefined)
-        return cursor;
-    return cursor.limit(options.limit);
+    function applyLimit(cursor, options) {
+        var limit = options.limit || defaultLimit || maximumLimit;
+        if (limit > maximumLimit)
+            limit = maximumLimit
+        if (limit === undefined)
+            return cursor;
+        return cursor.limit(limit);
+    }
 }
