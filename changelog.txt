@@ -1,3 +1,7 @@
+0.2.8:
+- adding asCursor as option when selecting mongo component
+- adding isDebugging as option in http-request component
+
 0.2.7:
 - adding defaultLimit and maximumLimit for mongo component
 

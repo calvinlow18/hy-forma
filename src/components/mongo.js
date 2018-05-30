@@ -84,6 +84,8 @@ function mongo(config) {
     async function select(query, options) {
         query = query || {};
         options = options || {};
+        var asCursor = options.asCursor;
+        delete options.asCursor;
         logger("Selecting");
         var connection = await connect();
         var collection = await connection.collection;
@@ -94,6 +96,8 @@ function mongo(config) {
         cursor = applySort(cursor, options);
         cursor = applySkip(cursor, options);
         cursor = applyLimit(cursor, options);
+        if (asCursor)
+            return await cursor;
         var result = await cursor.toArray();
         logger("Select Result", result);
         connection.session.close();

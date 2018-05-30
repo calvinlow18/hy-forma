@@ -10,8 +10,11 @@ function http(endpoint, options) {
         return null;
 
     var options = options || {};
+    var isDebugging = options.isDebugging;
     var defaultHeaders = options.headers;
     var defaultQuery = options.query;
+    var logger = isDebugging ? console.log : function () {};
+
 
     return {
         post: post,
@@ -22,6 +25,7 @@ function http(endpoint, options) {
     }
 
     async function send(settings) {
+        logger(settings);
         settings = settings || {};
         var extendSetting = settings.extendSetting || function () {};
 
@@ -50,6 +54,7 @@ function http(endpoint, options) {
         extendSetting(requestSettings);
 
         var result = new Promise(function (resolve, reject) {
+            logger("%s %s\nHeaders: %s\nData: %s", method, finalUrl, JSON.stringify(combinedHeaders, null, 4), data)
             request(requestSettings, function (error, response, body) {
                 if (error)
                     return reject(err);
