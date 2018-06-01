@@ -1,3 +1,8 @@
+0.2.9:
+- utils.deepClean
+- utils.isEmptyObjects
+- forma.version
+
 0.2.8:
 - adding asCursor as option when selecting mongo component
 - adding isDebugging as option in http-request component
