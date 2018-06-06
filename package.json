@@ -1,6 +1,6 @@
 {
   "name": "hy-forma",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mongodb": "^3.0.7",
-    "request": "^2.85.0"
+    "mongodb": "^3.0.10",
+    "request": "^2.87.0"
   }
 }

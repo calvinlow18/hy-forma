@@ -29,6 +29,7 @@ function mongo(config) {
 
         setCollection: setCollection, // void: setCollection(name)
         setDatabase: setDatabase, // void: setDatabase(name)
+        connectionString: connectionString,
     }
 
     extension(wraps);
@@ -92,10 +93,9 @@ function mongo(config) {
         if (!collection)
             throw Error("No collection defined");
         logger("Select Query: ", query, "Select Options", options);
-        var cursor = collection.find(query);
-        cursor = applySort(cursor, options);
-        cursor = applySkip(cursor, options);
-        cursor = applyLimit(cursor, options);
+        setLimit(options);
+        var cursor = collection.find(query,options);
+        
         if (asCursor)
             return await cursor;
         var result = await cursor.toArray();
@@ -203,24 +203,8 @@ function mongo(config) {
 
     }
 
-    function applySort(cursor, options) {
-        if (!options.sort)
-            return cursor;
-        return cursor.sort(options.sort);
+    function setLimit(options){
+        options.limit = options.limit || defaultLimit || maximumLimit
     }
 
-    function applySkip(cursor, options) {
-        if (options.skip === undefined)
-            return cursor;
-        return cursor.skip(options.skip);
-    }
-
-    function applyLimit(cursor, options) {
-        var limit = options.limit || defaultLimit || maximumLimit;
-        if (limit > maximumLimit)
-            limit = maximumLimit
-        if (limit === undefined)
-            return cursor;
-        return cursor.limit(limit);
-    }
 }

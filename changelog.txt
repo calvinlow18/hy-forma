@@ -1,3 +1,6 @@
+0.2.10:
+- updating the implementation of the mongo component to fully support .find
+
 0.2.9:
 - utils.deepClean
 - utils.isEmptyObjects
