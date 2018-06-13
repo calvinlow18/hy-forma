@@ -94,13 +94,19 @@ function mongo(config) {
             throw Error("No collection defined");
         logger("Select Query: ", query, "Select Options", options);
         setLimit(options);
-        var cursor = collection.find(query,options);
-        
+        var cursor = collection.find(query, options);
+
         if (asCursor)
             return await cursor;
         var result = await cursor.toArray();
         logger("Select Result", result);
         connection.session.close();
+        if (!options.extend || typeof (options.extend) != "function")
+            return result;
+        logger("Extending entities");
+        extend = options.extend;
+        for (var i in result)
+            await extend(result[i]);
         return result;
     }
 
@@ -203,8 +209,10 @@ function mongo(config) {
 
     }
 
-    function setLimit(options){
-        options.limit = options.limit || defaultLimit || maximumLimit
+    function setLimit(options) {
+        options.limit = options.limit || defaultLimit;
+        if (maximumLimit)
+            options.limit = Math.min(options.limit, maximumLimit);
     }
 
 }
