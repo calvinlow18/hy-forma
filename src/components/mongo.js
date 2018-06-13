@@ -8,7 +8,7 @@ function mongo(config) {
     var extension = mongo.extension || function () {};
 
 
-    var connectionString = generateConnectionString();
+    var connectionString = config.connectionString || generateConnectionString();
     var collectionName = config.collection;
     var databaseName = config.database;
     var defaultLimit = config.defaultLimit;
@@ -24,8 +24,8 @@ function mongo(config) {
         select: select, // [object]: select(query?,options?)
 
         count: count, // int: count(query?)
-        distinct: distinct, //
-        group: group,
+        distinct: distinct, // [object]: distinct (field,query,options)
+        group: group, // [object]:  group(keys, condition, initial, reduce, finalize, command, options)
 
         setCollection: setCollection, // void: setCollection(name)
         setDatabase: setDatabase, // void: setDatabase(name)

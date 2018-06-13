@@ -5,6 +5,7 @@ var forma = {
     components: {
         mongo: sourceRequire("components/mongo"),
         httpRequest: sourceRequire("components/http-request"),
+        mail: sourceRequire("components/mail"),
     },
     utils: {
         argsenv: sourceRequire("utils/argsenv"),
@@ -20,6 +21,7 @@ var forma = {
         mongo: sourceRequire("utils/mongo"),
         guid: sourceRequire("utils/guid"),
         stringFormat: sourceRequire("utils/string-format"),
+        stringRender: sourceRequire("utils/string-render"),
         stripDash: sourceRequire("utils/strip-dash"),
         url: sourceRequire("utils/url"),
     },

@@ -1,3 +1,7 @@
+0.2.11:
+- component.mail
+- utils.stringRender
+
 0.2.10:
 - updating the implementation of the mongo component to fully support .find
 
