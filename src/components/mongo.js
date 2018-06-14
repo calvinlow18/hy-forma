@@ -69,14 +69,15 @@ function mongo(config) {
         return result;
     }
 
-    async function update(query, values) {
+    async function update(query, values, options) {
+        var options = options || {};
         logger("Updating");
         var connection = await connect();
         var collection = await connection.collection;
         if (!collection)
             throw Error("No collection defined");
-        logger("Update Query: ", query, "Update Values: ", values);
-        var result = await collection.updateMany(query, values);
+        logger("Update Query: ", query, "Update Values: ", values, "Options:", options);
+        var result = await collection.updateMany(query, values, options);
         logger("Update Result", result);
         connection.session.close();
         return result;
@@ -94,8 +95,8 @@ function mongo(config) {
             throw Error("No collection defined");
         logger("Select Query: ", query, "Select Options", options);
         setLimit(options);
-        var cursor = collection.find(query,options);
-        
+        var cursor = collection.find(query, options);
+
         if (asCursor)
             return await cursor;
         var result = await cursor.toArray();
@@ -203,7 +204,7 @@ function mongo(config) {
 
     }
 
-    function setLimit(options){
+    function setLimit(options) {
         options.limit = options.limit || defaultLimit || maximumLimit
     }
 
