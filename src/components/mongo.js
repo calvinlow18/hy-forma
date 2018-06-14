@@ -102,6 +102,12 @@ function mongo(config) {
         var result = await cursor.toArray();
         logger("Select Result", result);
         connection.session.close();
+        if (!options.extend || typeof (options.extend) != "function")
+            return result;
+        logger("Extending entities");
+        extend = options.extend;
+        for (var i in result)
+            await extend(result[i]);
         return result;
     }
 
@@ -205,7 +211,9 @@ function mongo(config) {
     }
 
     function setLimit(options) {
-        options.limit = options.limit || defaultLimit || maximumLimit
+        options.limit = options.limit || defaultLimit;
+        if (maximumLimit)
+            options.limit = Math.min(options.limit, maximumLimit);
     }
 
 }
