@@ -1,0 +1,44 @@
+0.2.12: 
+- adding options to mongo component update
+
+0.2.11:
+- component.mail
+- utils.stringRender
+
+0.2.10:
+- updating the implementation of the mongo component to fully support .find
+
+0.2.9:
+- utils.deepClean
+- utils.isEmptyObjects
+- forma.version
+
+0.2.8:
+- adding asCursor as option when selecting mongo component
+- adding isDebugging as option in http-request component
+
+0.2.7:
+- adding defaultLimit and maximumLimit for mongo component
+
+0.2.6:
+- fixed middleware route ignored
+
+0.2.5:
+- changing http request to follow convention
+
+0.2.4:
+- adding http request component
+- adding combine utils
+
+0.2.3:
+- fixed bug on url starts with "//" not being normalized
+
+0.2.2:
+- adding extension for mongo.component by using mongo.component.extension
+
+0.2.1:
+- fixed error thrown by router not catched
+
+0.2.0:
+- kernel for dependency injection
+

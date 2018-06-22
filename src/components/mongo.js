@@ -2,11 +2,17 @@ const connectionStringFormat = "mongodb://{{usernameAndPassword}}{{host}}:{{port
 
 var MongoClient = require("mongodb").MongoClient;
 
-module.exports = function mongo(config) {
+module.exports = mongo;
 
-    var connectionString = generateConnectionString();
+function mongo(config) {
+    var extension = mongo.extension || function () {};
+
+
+    var connectionString = config.connectionString || generateConnectionString();
     var collectionName = config.collection;
     var databaseName = config.database;
+    var defaultLimit = config.defaultLimit;
+    var maximumLimit = config.maximumLimit;
     var logger = config.logger || function () {};
 
     var wraps = {
@@ -18,10 +24,15 @@ module.exports = function mongo(config) {
         select: select, // [object]: select(query?,options?)
 
         count: count, // int: count(query?)
+        distinct: distinct, // [object]: distinct (field,query,options)
+        group: group, // [object]:  group(keys, condition, initial, reduce, finalize, command, options)
 
         setCollection: setCollection, // void: setCollection(name)
         setDatabase: setDatabase, // void: setDatabase(name)
+        connectionString: connectionString,
     }
+
+    extension(wraps);
 
     return wraps;
 
@@ -58,14 +69,15 @@ module.exports = function mongo(config) {
         return result;
     }
 
-    async function update(query, values) {
+    async function update(query, values, options) {
+        var options = options || {};
         logger("Updating");
         var connection = await connect();
         var collection = await connection.collection;
         if (!collection)
             throw Error("No collection defined");
-        logger("Update Query: ", query, "Update Values: ", values);
-        var result = await collection.updateMany(query, values);
+        logger("Update Query: ", query, "Update Values: ", values, "Options:", options);
+        var result = await collection.updateMany(query, values, options);
         logger("Update Result", result);
         connection.session.close();
         return result;
@@ -74,19 +86,28 @@ module.exports = function mongo(config) {
     async function select(query, options) {
         query = query || {};
         options = options || {};
+        var asCursor = options.asCursor;
+        delete options.asCursor;
         logger("Selecting");
         var connection = await connect();
         var collection = await connection.collection;
         if (!collection)
             throw Error("No collection defined");
         logger("Select Query: ", query, "Select Options", options);
-        var cursor = collection.find(query);
-        cursor = applySort(cursor, options);
-        cursor = applySkip(cursor, options);
-        cursor = applyLimit(cursor, options);
+        setLimit(options);
+        var cursor = collection.find(query, options);
+
+        if (asCursor)
+            return await cursor;
         var result = await cursor.toArray();
         logger("Select Result", result);
         connection.session.close();
+        if (!options.extend || typeof (options.extend) != "function")
+            return result;
+        logger("Extending entities");
+        extend = options.extend;
+        for (var i in result)
+            await extend(result[i]);
         return result;
     }
 
@@ -113,6 +134,39 @@ module.exports = function mongo(config) {
         logger("Count Query", query);
         var result = await collection.find(query).count();
         logger("Count: ", result);
+        connection.session.close();
+        return result;
+    }
+
+    async function distinct(field, query, options) {
+        logger("Distincting");
+        query = query || {};
+        var connection = await connect();
+        var collection = await connection.collection;
+        if (!collection)
+            throw Error("No collection defined");
+        logger("Distinct Query", query);
+        var result = await collection.distinct(field, query, options);
+        logger("Distinct: ", result);
+        connection.session.close();
+        return result;
+    }
+
+    async function group(keys, condition, initial, reduce, finalize, command, options) {
+        logger("Grouping");
+        keys = keys || {};
+        condition = condition || {};
+        initial = initial || {};
+        reduce = reduce || function () {};
+        finalize = finalize || function () {};
+        options = options || {};
+
+        var connection = await connect();
+        var collection = await connection.collection;
+        if (!collection)
+            throw Error("No collection defined");
+        var result = await collection.group(keys, condition, initial, reduce, finalize, command, options);
+        logger("Grouping: ", result);
         connection.session.close();
         return result;
     }
@@ -156,22 +210,10 @@ module.exports = function mongo(config) {
 
     }
 
-}
+    function setLimit(options) {
+        options.limit = options.limit || defaultLimit;
+        if (maximumLimit)
+            options.limit = Math.min(options.limit, maximumLimit);
+    }
 
-function applySort(cursor, options) {
-    if (!options.sort)
-        return cursor;
-    return cursor.sort(options.sort);
-}
-
-function applySkip(cursor, options) {
-    if (options.skip === undefined)
-        return cursor;
-    return cursor.skip(options.skip);
-}
-
-function applyLimit(cursor, options) {
-    if (options.limit === undefined)
-        return cursor;
-    return cursor.limit(options.limit);
 }

@@ -17,7 +17,6 @@ module.exports = function router(expressApp, routeConfig, options) {
     var baseFolder = options.baseFolder || "/";
     var routes = routeConfig.routes;
     var prettyResult = options.prettyResult;
-    var jsonify = prettyResult ? jstring : JSON.stringify;
 
 
     for (var i in routes) {
@@ -53,12 +52,11 @@ module.exports = function router(expressApp, routeConfig, options) {
             var resultPromise = callbackFunction(req, res, next);
             if (resultPromise && resultPromise.then)
                 resultPromise.then(function (result) {
-                    res.end(jsonify(result));
-                });
-            if (resultPromise && resultPromise.catch)
-                resultPromise.catch(function (result) {
-                    next(result);
-                });
+                    if (typeof (result) == "object")
+                        res.json(result);
+                    else
+                        res.end(result);
+                }, next);
             return resultPromise;
         }
 

@@ -5,5 +5,7 @@ module.exports = function url() {
         result += "/" + arguments[i];
     }
     result = result.replace(/([^:]\/)\/+/g, "$1");
+    if (result.startsWith("/"))
+        result = result.replace(/\/\//g, "/");
     return result;
 };
