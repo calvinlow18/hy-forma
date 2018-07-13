@@ -11,7 +11,7 @@ var forma = {
     utils: {
         argsenv: sourceRequire("utils/argsenv"),
         cleanEmpty: sourceRequire("utils/clean-empty"),
-        cleanNull: sourceRequire("utils/clean-undefined"),
+        cleanNull: sourceRequire("utils/clean-null"),
         cleanUndefined: sourceRequire("utils/clean-undefined"),
         combine: sourceRequire("utils/combine"),
         deepClean: sourceRequire("utils/deep-clean"),
@@ -19,6 +19,7 @@ var forma = {
         functionArguments: sourceRequire("utils/function-arguments"),
         isEmptyObject: sourceRequire("utils/is-empty-object"),
         jstring: sourceRequire("utils/jstring"),
+        merge: sourceRequire("utils/merge"),
         mongo: sourceRequire("utils/mongo"),
         guid: sourceRequire("utils/guid"),
         stringFormat: sourceRequire("utils/string-format"),
