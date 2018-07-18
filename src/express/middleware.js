@@ -21,7 +21,7 @@ module.exports = function middleware(expressApp, middlewareConfig, options) {
     }
 
     function functionHandler(fn) {
-        expressApp.use(baseUrl, fn)
+        applyMiddleware(baseUrl, fn);
     }
 
     // config = {
@@ -32,6 +32,21 @@ module.exports = function middleware(expressApp, middlewareConfig, options) {
         var handler = config.handler;
         var route = config.route || "/";
         var endpoint = url(baseUrl, route);
-        expressApp.use(endpoint, handler)
+        applyMiddleware(endpoint, handler)
+    }
+
+    function applyMiddleware(url, handler) {
+        wrappedHandler = wrapHandler(handler);
+        expressApp.use(url, wrappedHandler)
+    }
+
+    function wrapHandler(handler) {
+        return function (req, res, next) {
+            var execution = handler(req, res, next);
+            if (execution instanceof Promise)
+                execution.then(function () {
+                    next();
+                }, next);
+        }
     }
 };

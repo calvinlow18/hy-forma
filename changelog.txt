@@ -1,3 +1,7 @@
+0.2.15:
+- express middleware async mode
+- http request default is json if can
+
 0.2.14:
 - unit testings
 - utils.merge

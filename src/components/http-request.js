@@ -13,6 +13,7 @@ function http(endpoint, options) {
     var isDebugging = options.isDebugging;
     var defaultHeaders = options.headers;
     var defaultQuery = options.query;
+    var optionsIsJson = "isJson" in options ? options.isJson : true;
     var logger = isDebugging ? console.log : function () {};
 
 
@@ -34,6 +35,7 @@ function http(endpoint, options) {
         var headers = settings.headers || {};
         var query = settings.query;
         var method = (settings.method || "GET").toUpperCase();
+        var isJson = "isJson" in settings ? settings.isJson : optionsIsJson;
 
         var combinedHeaders = combine(defaultHeaders, headers);
         var combinedQuery = combine(defaultQuery, query);
@@ -58,6 +60,8 @@ function http(endpoint, options) {
             request(requestSettings, function (error, response, body) {
                 if (error)
                     return reject(err);
+                if (isJson)
+                    body = parseJsonSafe(body);
                 resolve(body);
             });
         });
@@ -118,4 +122,12 @@ function createStringQuery(query) {
         result += i + "=" + query[i];
     }
     return result;
+}
+
+function parseJsonSafe(jsonOrString) {
+    try {
+        return JSON.parse(jsonOrString);
+    } catch (ex) {
+        return jsonOrString;
+    }
 }
