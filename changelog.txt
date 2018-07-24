@@ -1,3 +1,6 @@
+0.2.16:
+- fixed err not found in http-request
+
 0.2.15:
 - express middleware async mode
 - http request default is json if can

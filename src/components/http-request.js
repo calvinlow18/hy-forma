@@ -59,7 +59,7 @@ function http(endpoint, options) {
             logger("%s %s\nHeaders: %s\nData: %s", method, finalUrl, JSON.stringify(combinedHeaders, null, 4), data)
             request(requestSettings, function (error, response, body) {
                 if (error)
-                    return reject(err);
+                    return reject(error);
                 if (isJson)
                     body = parseJsonSafe(body);
                 resolve(body);
