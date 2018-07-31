@@ -16,13 +16,13 @@ module.exports = function router(expressApp, routeConfig, options) {
     var baseUrl = options.url || "/";
     var baseFolder = options.baseFolder || "/";
     var routes = routeConfig.routes;
-    var prettyResult = options.prettyResult;
 
 
     for (var i in routes) {
         var route = routes[i];
         var routeUrl = route.url;
         var callback = route.callback;
+        var middlewares = route.middlewares || [];
         var method = route.method.toLowerCase();
         var callbackType = typeof (callback);
 
@@ -30,7 +30,7 @@ module.exports = function router(expressApp, routeConfig, options) {
         var callbackFunction = callbackHandler(callback);
         var wrappedAsync = wrapAsync(callbackFunction);
         var endpoint = url(baseUrl, routeUrl);
-        expressApp[method](endpoint, wrappedAsync);
+        expressApp[method](endpoint, middlewares, wrappedAsync);
     }
 
     function functionCallbackHandler(callback) {

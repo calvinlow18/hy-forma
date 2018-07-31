@@ -12,6 +12,8 @@ module.exports = function middleware(expressApp, middlewareConfig, options) {
 
     options = options || {};
     var baseUrl = options.url || "/";
+    var logger = options.logger || function () {};
+    var middlewares = [];
 
     for (var i in middlewareConfig) {
         var config = middlewareConfig[i];
@@ -20,8 +22,15 @@ module.exports = function middleware(expressApp, middlewareConfig, options) {
         handler(config);
     }
 
+    return {
+        middlewares
+    }
+
     function functionHandler(fn) {
-        applyMiddleware(baseUrl, fn);
+        method = "use";
+        var routes = [baseUrl];
+        applyMiddleware(method, routes, fn);
+        addMiddlewareList(method, routes, fn);
     }
 
     // config = {
@@ -30,18 +39,46 @@ module.exports = function middleware(expressApp, middlewareConfig, options) {
     // }
     function objectHandler(config) {
         var handler = config.handler;
-        var route = config.route || "/";
-        var endpoint = url(baseUrl, route);
-        applyMiddleware(endpoint, handler)
+        var routeConfig = config.route || "/";
+        var method = config.method || "use";
+        var routes = routeConfig instanceof Array ? routeConfig : [routeConfig];
+        for (var i in routes)
+            routes[i] = url(baseUrl, routes[i]);
+
+        applyMiddleware(method, routes, handler);
+        addMiddlewareList(method, routes, handler);
     }
 
-    function applyMiddleware(url, handler) {
-        wrappedHandler = wrapHandler(handler);
-        expressApp.use(url, wrappedHandler)
+    function applyMiddleware(method, routes, handler) {
+        var wrappedHandler = wrapHandler(handler);
+        for (var i in routes) {
+            var route = routes[i];
+            expressApp[method](route, wrappedHandler);
+        }
+    }
+
+    function addMiddlewareList(method, routes, handler) {
+        middlewares.push({
+            method: method,
+            routes: routes,
+            handler: handler,
+        })
     }
 
     function wrapHandler(handler) {
+        var result = [];
+        if (typeof (handler) == "function")
+            result.push(wrapSingleHandler(handler));
+        if (handler instanceof Array)
+            for (var i in handler) {
+                result = result.concat(wrapHandler(handler[i]));
+            }
+        return result;
+    }
+
+    function wrapSingleHandler(handler) {
         return function (req, res, next) {
+            logger(handler, req);
             var execution = handler(req, res, next);
             if (execution instanceof Promise)
                 execution.then(function () {
