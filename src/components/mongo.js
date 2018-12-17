@@ -26,6 +26,7 @@ function mongo(config) {
         count: count, // int: count(query?)
         distinct: distinct, // [object]: distinct (field,query,options)
         group: group, // [object]:  group(keys, condition, initial, reduce, finalize, command, options)
+        aggregate: aggregate,
 
         setCollection: setCollection, // void: setCollection(name)
         setDatabase: setDatabase, // void: setDatabase(name)
@@ -171,6 +172,46 @@ function mongo(config) {
         return result;
     }
 
+    function aggregate() {
+        var self = {};
+        var pipeline = [];
+
+        var aggregationStages = ["addFields", "bucket", "bucketAuto", "collStats", "count", "currentOp", "facet", "geoNear", 
+                                    "graphLookup", "group", "indexStats", "limit", "listLocalSessions", "listSessions", "lookup", 
+                                    "match", "out", "project", "redact", "replaceRoot", "sample", "skip", "sort", "sortByCount", "unwind"]
+
+        for (var i in aggregationStages) {
+            var stageName = aggregationStages[i];
+            self[stageName] = getPushToPipelineFunction(stageName, pipeline, self)
+
+        }
+
+        self.execute = async function () {
+            logger("Aggregating");
+            var connection = await connect();
+            var collection = await connection.collection;
+            if (!collection)
+                throw Error("No collection defined");
+            logger("Aggregate Pipeline", pipeline);
+            var result = await collection.aggregate(pipeline);
+            result = await result.toArray();
+            logger("Aggregate: ", result);
+            connection.session.close();
+            return result;
+        }
+
+        return self;
+    }
+
+    function getPushToPipelineFunction(stageName, pipeline, self) {
+        return function (query) {
+            var $stageName = "$" + stageName;
+            pipeline.push({
+                [$stageName]: query
+            })
+            return self;
+        }
+    }
 
     function setCollection(collection) {
         collectionName = collection;
